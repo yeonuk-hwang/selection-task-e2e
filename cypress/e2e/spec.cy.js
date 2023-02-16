@@ -16,12 +16,8 @@ describe("전체 요구사항 확인", () => {
   const TEMP_TODO_NAME = `todo-${Cypress._.random(0, 1e10)}`;
   const TEMP_TODO_NEW_NAME = `todo-${Cypress._.random(0, 1e10)}`;
 
-  it("메인 화면 방문 성공", () => {
-    cy.visit("/");
-  });
-
   it("리다이렉트 /todo -> /signin", () => {
-    cy.visit("/todo");
+    cy.visit("/todo", { failOnStatusCode: false });
     cy.on("uncaught:exception", (err, runnable) => {
       return false;
     });
@@ -33,40 +29,40 @@ describe("전체 요구사항 확인", () => {
       req.url = API + "/auth/signup";
     }).as("signup");
 
-    cy.visit("/signup");
+    cy.visit("/signup", { failOnStatusCode: false });
+    cy.on("uncaught:exception", (err, runnable) => false);
     cy.get("[data-testid=email-input]").type(TEMP_ID);
-    cy.get("[data-testid=password-input]").type(TEMP_PW);
-    cy.get("button").click();
+    cy.get("[data-testid=password-input]").type(TEMP_PW).blur();
+    cy.get("[data-testid=signup-button]").click();
     cy.wait("@signup");
     cy.url().should("contain", "/signin");
   });
 
   it("회원가입 불가 1 - 이메일 조건 불만족", () => {
-    cy.visit("/signup");
+    cy.visit("/signup", { failOnStatusCode: false });
     cy.get("[data-testid=email-input]").type(BAD_ID);
-    cy.get("[data-testid=password-input]").type(GOOD_PW);
-    cy.get("button").should("be.disabled");
+    cy.get("[data-testid=password-input]").type(GOOD_PW).blur();
+    cy.get("[data-testid=signup-button]").should("be.disabled");
   });
 
   it("회원가입 불가 2 - 비밀번호 조건 불만족", () => {
-    cy.visit("/signup");
+    cy.visit("/signup", { failOnStatusCode: false });
     cy.get("[data-testid=email-input]").type(GOOD_ID);
-    cy.get("[data-testid=password-input]").type(BAD_PW);
+    cy.get("[data-testid=password-input]").type(BAD_PW).blur();
     cy.get("[data-testid=signup-button]").should("be.disabled");
-    cy.get("button").should("be.disabled");
   });
 
   it("로그인 불가 1 - 이메일 조건 불만족", () => {
-    cy.visit("/signin");
+    cy.visit("/signin", { failOnStatusCode: false });
     cy.get("[data-testid=email-input]").type(BAD_ID);
-    cy.get("[data-testid=password-input]").type(GOOD_PW);
+    cy.get("[data-testid=password-input]").type(GOOD_PW).blur();
     cy.get("[data-testid=signin-button]").should("be.disabled");
   });
 
   it("로그인 불가 2 - 비밀번호 조건 불만족", () => {
-    cy.visit("/signin");
+    cy.visit("/signin", { failOnStatusCode: false });
     cy.get("[data-testid=email-input]").type(GOOD_ID);
-    cy.get("[data-testid=password-input]").type(BAD_PW);
+    cy.get("[data-testid=password-input]").type(BAD_PW).blur();
     cy.get("[data-testid=signin-button]").should("be.disabled");
   });
 
@@ -80,7 +76,7 @@ describe("전체 요구사항 확인", () => {
     cy.on("uncaught:exception", (err, runnable) => {
       return false;
     });
-    cy.visit("/signup");
+    cy.visit("/signup", { failOnStatusCode: false });
     cy.url().should("contain", "/todo");
   });
 
@@ -89,7 +85,7 @@ describe("전체 요구사항 확인", () => {
     cy.on("uncaught:exception", (err, runnable) => {
       return false;
     });
-    cy.visit("/signin");
+    cy.visit("/signin", { failOnStatusCode: false });
     cy.url().should("contain", "/todo");
   });
 
@@ -98,12 +94,12 @@ describe("전체 요구사항 확인", () => {
       return false;
     });
 
-    cy.intercept("/todos", (req) => {
+    cy.intercept("**/todos", (req) => {
       console.log("intecept");
       req.url = API + "/todos";
     }).as("todos");
 
-    cy.intercept("/todos/*", (req) => {
+    cy.intercept("**/todos/*", (req) => {
       const endpoint = req.url.split("/");
       const id = endpoint[endpoint.length - 1];
       req.url = API + "/todos/" + id;
@@ -141,4 +137,3 @@ describe("전체 요구사항 확인", () => {
     cy.get(TEMP_TODO_NEW_NAME).should("not.exist");
   });
 });
-

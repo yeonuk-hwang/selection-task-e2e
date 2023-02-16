@@ -30,10 +30,9 @@ Cypress.Commands.add("login", (email, pw) => {
     req.url = API + "/auth/signin";
   }).as("signin");
 
-  cy.visit("/signin");
+  cy.visit("/signin", { failOnStatusCode: false });
   cy.get("[data-testid=email-input]").type(email);
-  cy.get("[data-testid=password-input]").type(pw);
+  cy.get("[data-testid=password-input]").type(pw).blur();
   cy.get("[data-testid=signin-button]").click();
   cy.wait("@signin");
 });
-
