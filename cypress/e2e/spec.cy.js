@@ -36,11 +36,32 @@ describe("전체 요구사항 확인", () => {
   });
 
   it("리다이렉트 /todo -> /signin", () => {
-    cy.visit("/todo", { failOnStatusCode: false });
     cy.on("uncaught:exception", (err, runnable) => {
       return false;
     });
+
+    cy.visit("/todo", { failOnStatusCode: false });
     cy.url().should("contain", "/signin");
+  });
+
+  it("리다이렉트 /signup -> /todo", () => {
+    cy.on("uncaught:exception", (err, runnable) => {
+      return false;
+    });
+
+    cy.login(ID, PW);
+    cy.visit("/signup", { failOnStatusCode: false });
+    cy.url().should("contain", "/todo");
+  });
+
+  it("리다이렉트 /signin -> /todo", () => {
+    cy.on("uncaught:exception", (err, runnable) => {
+      return false;
+    });
+
+    cy.login(ID, PW);
+    cy.visit("/signin", { failOnStatusCode: false });
+    cy.url().should("contain", "/todo");
   });
 
   it("회원가입 및 리다이렉션 성공", () => {
@@ -53,7 +74,6 @@ describe("전체 요구사항 확인", () => {
     cy.get("[data-testid=email-input]").type(TEMP_ID);
     cy.get("[data-testid=password-input]").type(TEMP_PW).focused().blur();
     cy.get("[data-testid=signup-button]").click();
-    cy.wait("@signup");
     cy.url().should("contain", "/signin");
   });
 
@@ -90,24 +110,6 @@ describe("전체 요구사항 확인", () => {
     cy.url().should("contain", "/todo");
   });
 
-  it("리다이렉트 /signup -> /todo", () => {
-    cy.login(ID, PW);
-    cy.on("uncaught:exception", (err, runnable) => {
-      return false;
-    });
-    cy.visit("/signup", { failOnStatusCode: false });
-    cy.url().should("contain", "/todo");
-  });
-
-  it("리다이렉트 /signin -> /todo", () => {
-    cy.login(ID, PW);
-    cy.on("uncaught:exception", (err, runnable) => {
-      return false;
-    });
-    cy.visit("/signin", { failOnStatusCode: false });
-    cy.url().should("contain", "/todo");
-  });
-
   it("로그인 이후 Todo 생성-수정-삭제", () => {
     cy.on("uncaught:exception", (err, runnable) => {
       return false;
@@ -126,34 +128,28 @@ describe("전체 요구사항 확인", () => {
     cy.intercept("/todos/delete/all").as("deleteAll");
 
     cy.login(ID, PW);
-    cy.wait("@todos");
 
     // Todo 생성
     cy.get("[data-testid=new-todo-input]").type(TEMP_TODO_NAME);
     cy.get("[data-testid=new-todo-add-button]").click();
-    cy.wait("@todos");
+    cy.contains(TEMP_TODO_NAME).should("exist");
     cy.reload();
-    cy.wait("@todos");
     cy.contains(TEMP_TODO_NAME).should("exist");
 
     cy.get("[data-testid=modify-button]").click();
     cy.get("[data-testid=modify-input]").focus().clear();
     cy.get("[data-testid=modify-input]").type(TEMP_TODO_NEW_NAME);
     cy.get("[data-testid=submit-button]").click();
-    cy.wait("@todo");
     cy.contains(TEMP_TODO_NEW_NAME).should("exist");
 
     cy.reload();
-    cy.wait("@todos");
     cy.contains(TEMP_TODO_NEW_NAME).should("exist");
 
     // Todo 삭제
     cy.get("[data-testid=delete-button]").click();
-    cy.wait("@todo");
     cy.get(TEMP_TODO_NEW_NAME).should("not.exist");
 
     cy.reload();
-    cy.wait("@todos");
     cy.get(TEMP_TODO_NEW_NAME).should("not.exist");
   });
 });
