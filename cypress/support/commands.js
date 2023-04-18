@@ -23,7 +23,7 @@
 //
 // -- This will overwrite an existing command --
 
-const API = "https://pre-onboarding-selection-task.shop";
+const API = "https://www.pre-onboarding-selection-task.shop";
 
 Cypress.Commands.add("login", (email, pw) => {
   cy.intercept("POST", /signin/, (req) => {
