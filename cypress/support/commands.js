@@ -32,7 +32,7 @@ Cypress.Commands.add("login", (email, pw) => {
 
   cy.visit("/signin", { failOnStatusCode: false });
   cy.get("[data-testid=email-input]").type(email);
-  cy.get("[data-testid=password-input]").type(pw).blur();
+  cy.get("[data-testid=password-input]").type(pw).focused().blur();
   cy.get("[data-testid=signin-button]").click();
   cy.wait("@signin");
 });
